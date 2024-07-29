@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Oxígeno Disuelto</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Calculadora de Oxígeno Disuelto</h1>
+        <div id="reloj"></div>
+        <p>Calcula la cantidad de oxígeno disuelto en un líquido basado en la temperatura, salinidad, presión atmosférica, altitud y cantidad de agua.</p>
+        
+        <div class="input-group">
+            <label for="temperature">Temperatura (°C):</label>
+            <input type="number" id="temperature" placeholder="Ejemplo: 25" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="salinity">Salinidad (g/L):</label>
+            <input type="number" id="salinity" placeholder="Ejemplo: 0" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="pressure">Presión Atmosférica (mmHg):</label>
+            <input type="number" id="pressure" placeholder="Ejemplo: 760" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="altitude">Altitud (m):</label>
+            <input type="number" id="altitude" placeholder="Ejemplo: 0" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="cantidad-agua">Cantidad de Agua (L):</label>
+            <input type="number" id="cantidad-agua" placeholder="Ejemplo: 100" required>
+        </div>
+        
+        <div class="button-container">
+            <button onclick="calcularOxigeno()">Calcular</button>
+            <button onclick="toggleRangos()">Mostrar/Ocultar Rangos</button>
+        </div>
+        
+        <div class="result" id="resultado"></div>
+        <div id="rangos">
+            <h2>Rangos de Niveles de Oxígeno Disuelto</h2>
+            <ul>
+                <li><strong>0 - 2 mg/L:</strong> Muy bajo (condiciones críticas para la vida acuática).</li>
+                <li><strong>2 - 5 mg/L:</strong> Bajo (puede afectar a especies sensibles).</li>
+                <li><strong>5 - 8 mg/L:</strong> Moderado (aceptable para muchas especies).</li>
+                <li><strong>8 - 10 mg/L:</strong> Bueno (condiciones saludables para la mayoría de la vida acuática).</li>
+                <li><strong>10 - 14 mg/L:</strong> Excelente (ideal para la vida acuática).</li>
+                <li><strong>14+ mg/L:</strong> Saturado (puede ser excesivo para algunas especies).</li>
+            </ul>
+        </div>
+        
+        <div class="especies" id="especies">
+            <h2>Especies Marinas según el Rango de Oxígeno Disuelto</h2>
+            <ul id="lista-especies"></ul>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Calculadora de Oxígeno Disuelto. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
