@@ -1,72 +1,64 @@
-function calcularOxigeno() {
-    const temperatura = parseFloat(document.getElementById('temperature').value);
-    const salinidad = parseFloat(document.getElementById('salinity').value);
-    const presion = parseFloat(document.getElementById('pressure').value);
-    const altitud = parseFloat(document.getElementById('altitude').value);
-    const cantidadAgua = parseFloat(document.getElementById('cantidad-agua').value);
+function getCorrectionConstant(temp) {
+    const constants = {
+        1: 0.08796,
+        2: 0.08485,
+        3: 0.08184,
+        4: 0.07911,
+        5: 0.07646,
+        6: 0.07391,
+        7: 0.07135,
+        8: 0.06916,
+        9: 0.06697,
+        10: 0.06478,
+        11: 0.06286,
+        12: 0.06104,
+        13: 0.05931,
+        14: 0.05757,
+        15: 0.05602,
+        16: 0.05456,
+        17: 0.05328,
+        18: 0.05201,
+        19: 0.05073,
+        20: 0.04964,
+        21: 0.04854,
+        22: 0.04754,
+        23: 0.04662,
+        24: 0.04580,
+        25: 0.04498,
+        26: 0.04425,
+        27: 0.04361,
+        28: 0.04296,
+    };
+    return constants[Math.round(temp)] || 0;
+}
+
+function calculateOxygen() {
+    const temp = parseFloat(document.getElementById('temperature').value);
+    const salinity = parseFloat(document.getElementById('salinity').value);
+    const pressure = parseFloat(document.getElementById('pressure').value);
     
-    if (isNaN(temperatura) || isNaN(salinidad) || isNaN(presion) || isNaN(altitud) || isNaN(cantidadAgua)) {
-        document.getElementById('resultado').innerText = 'Por favor, ingrese valores válidos.';
-        return;
-    }
+    // Valor de oxígeno disuelto en condiciones estándar (ejemplo)
+    const standardDO = 8.55; // mg/L a 23°C y 0 ppt
 
-    // Ajuste por altitud (simplificado)
-    const ajusteAltitud = 1 - (altitud / 10000); // Factor de ajuste simple
+    // Obtener la constante de corrección para la salinidad
+    const k = getCorrectionConstant(temp);
 
-    // Fórmula ajustada para calcular oxígeno disuelto (mg/L)
-    const oxigenoDisueltoPorL = ((14.652 - 0.41022 * temperatura + 0.007991 * Math.pow(temperatura, 2) - 0.000077774 * Math.pow(temperatura, 3)) * (1 - (salinidad / 100)) * (presion / 760) * ajusteAltitud).toFixed(2);
-    const oxigenoDisueltoTotal = (oxigenoDisueltoPorL * cantidadAgua).toFixed(2); // Total en mg
+    // Calcular el oxígeno disuelto corregido
+    const correctedDO = (standardDO + (pressure - 760) * 0.00143) - (k * salinity);
 
-    // Cálculo del porcentaje de saturación
-    const saturacionMaxima = 14.652 * (1 - (salinidad / 100)) * (presion / 760) * ajusteAltitud;
-    const porcentajeSaturacion = ((oxigenoDisueltoPorL / saturacionMaxima) * 100).toFixed(2);
+    // Calcular el porcentaje de saturación
+    const maxSaturationDO = standardDO + (pressure - 760) * 0.00143; // Oxígeno disuelto en condiciones ideales
+    const saturationPercentage = (correctedDO / maxSaturationDO) * 100;
 
-    document.getElementById('resultado').innerText = `Oxígeno Disuelto: ${oxigenoDisueltoPorL} mg/L\nTotal de Oxígeno Disuelto: ${oxigenoDisueltoTotal} mg\nPorcentaje de Saturación: ${porcentajeSaturacion}%`;
-
-    mostrarEspecies(oxigenoDisueltoPorL);
+    document.getElementById('result').innerText = `Oxígeno Disuelto Corregido: ${correctedDO.toFixed(2)} mg/L\nPorcentaje de Saturación: ${saturationPercentage.toFixed(2)}%`;
 }
 
-function mostrarEspecies(oxigenoDisuelto) {
-    const listaEspecies = document.getElementById('lista-especies');
-    listaEspecies.innerHTML = ''; // Limpiar la lista anterior
-
-    let especies = [];
-
-    if (oxigenoDisuelto <= 2) {
-        especies = ['Pez gato (Asterophysus batrachus)', 'Almejas (Corbicula fluminea)'];
-    } else if (oxigenoDisuelto <= 5) {
-        especies = ['Tilapia (Oreochromis spp.)', 'Cangrejo de río (Procambarus spp.)'];
-    } else if (oxigenoDisuelto <= 8) {
-        especies = ['Pargo (Lutjanus spp.)', 'Sardina (Sardinella spp.)'];
-    } else if (oxigenoDisuelto <= 10) {
-        especies = ['Mero (Epinephelus spp.)', 'Pulpo (Octopus spp.)'];
-    } else if (oxigenoDisuelto <= 14) {
-        especies = ['Delfín (Delphinus spp.)', 'Tortuga marina (Chelonia mydas)'];
-    } else {
-        especies = ['Tiburón (Carcharhinus spp.)', 'Ballena jorobada (Megaptera novaeangliae)'];
-    }
-
-    especies.forEach(especie => {
-        const li = document.createElement('li');
-        li.innerText = especie;
-        listaEspecies.appendChild(li);
-    });
+function toggleInfo() {
+    const infoDiv = document.getElementById('info');
+    infoDiv.style.display = (infoDiv.style.display === 'none' || infoDiv.style.display === '') ? 'block' : 'none';
 }
 
-function toggleRangos() {
-    const rangosDiv = document.getElementById('rangos');
-    if (rangosDiv.style.display === "none" || rangosDiv.style.display === "") {
-        rangosDiv.style.display = "block";
-    } else {
-        rangosDiv.style.display = "none";
-    }
+function toggleDoRanges() {
+    const doRangesDiv = document.getElementById('doRanges');
+    doRangesDiv.style.display = (doRangesDiv.style.display === 'none' || doRangesDiv.style.display === '') ? 'block' : 'none';
 }
-
-function actualizarReloj() {
-    const opciones = { timeZone: 'America/Santo_Domingo', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-    const fechaHora = new Intl.DateTimeFormat('es-DO', opciones).format(new Date());
-    document.getElementById('reloj').innerText = fechaHora;
-}
-
-setInterval(actualizarReloj, 1000);
-actualizarReloj(); // Llamar una vez al cargar
