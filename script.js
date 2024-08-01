@@ -1,48 +1,64 @@
+function getCorrectionConstant(temp) {
+    const constants = {
+        1: 0.08796,
+        2: 0.08485,
+        3: 0.08184,
+        4: 0.07911,
+        5: 0.07646,
+        6: 0.07391,
+        7: 0.07135,
+        8: 0.06916,
+        9: 0.06697,
+        10: 0.06478,
+        11: 0.06286,
+        12: 0.06104,
+        13: 0.05931,
+        14: 0.05757,
+        15: 0.05602,
+        16: 0.05456,
+        17: 0.05328,
+        18: 0.05201,
+        19: 0.05073,
+        20: 0.04964,
+        21: 0.04854,
+        22: 0.04754,
+        23: 0.04662,
+        24: 0.04580,
+        25: 0.04498,
+        26: 0.04425,
+        27: 0.04361,
+        28: 0.04296,
+    };
+    return constants[Math.round(temp)] || 0;
+}
+
 function calculateOxygen() {
-    const altitude = parseFloat(document.getElementById('altitude').value);
-    const depth = parseFloat(document.getElementById('depth').value);
-    const temperatureC = parseFloat(document.getElementById('temperature').value);
+    const temp = parseFloat(document.getElementById('temperature').value);
     const salinity = parseFloat(document.getElementById('salinity').value);
+    const pressure = parseFloat(document.getElementById('pressure').value);
+    
+    // Valor de oxígeno disuelto en condiciones estándar (ejemplo)
+    const standardDO = 8.55; // mg/L a 23°C y 0 ppt
 
-    // Constantes
-    const P0 = 101325; // Presión al nivel del mar en Pa
-    const M = 0.029; // Masa molar del aire en kg/mol
-    const g = 9.81; // Aceleración debida a la gravedad en m/s²
-    const R = 8.314; // Constante universal de los gases en J/(mol·K)
-    const T0 = 298; // Temperatura de referencia en K (25°C)
-    const dHsol = -55560; // Entalpía de solubilidad del oxígeno en J/mol
-    const kH0 = 769; // Constante de Henry a 25°C en atm·L/mol
-    const B = 0.0313; // Coeficiente empírico para salinidad
+    // Obtener la constante de corrección para la salinidad
+    const k = getCorrectionConstant(temp);
 
-    // Convertir temperatura a Kelvin
-    const temperatureK = temperatureC + 273.15;
-
-    // Calcular la presión atmosférica a la altitud dada
-    const P_alt = P0 * Math.exp(-M * g * altitude / (R * temperatureK));
-
-    // Calcular la presión hidroestática a la profundidad dada
-    const P_prof = P_alt + 1000 * g * depth;
-
-    // Calcular la constante de Henry ajustada por temperatura
-    const kH_T = kH0 * Math.exp(dHsol / R * (1 / T0 - 1 / temperatureK));
-
-    // Aplicar la corrección de salinidad
-    const S_corr = Math.exp(-B * salinity / temperatureK);
-
-    // Ajustar la constante de Henry por salinidad
-    const kH_ST = kH_T * S_corr;
-
-    // Calcular OD_real
-    const OD_real = kH_ST * (P_prof / P0);
-
-    // Calcular OD_sat (bajo condiciones estándar)
-    const OD_sat = kH_ST;
+    // Calcular el oxígeno disuelto corregido
+    const correctedDO = (standardDO + (pressure - 760) * 0.00143) - (k * salinity);
 
     // Calcular el porcentaje de saturación
-    const saturationPercentage = (OD_real / OD_sat) * 100;
+    const maxSaturationDO = standardDO + (pressure - 760) * 0.00143; // Oxígeno disuelto en condiciones ideales
+    const saturationPercentage = (correctedDO / maxSaturationDO) * 100;
 
-    // Mostrar resultados
-    document.getElementById('od-real').textContent = `Oxígeno Disuelto Real: ${OD_real.toFixed(2)} atm·L/mol`;
-    document.getElementById('od-sat').textContent = `Oxígeno Disuelto a Saturación: ${OD_sat.toFixed(2)} atm·L/mol`;
-    document.getElementById('saturation-percentage').textContent = `Porcentaje de Saturación: ${saturationPercentage.toFixed(2)}%`;
+    document.getElementById('result').innerText = `Oxígeno Disuelto Corregido: ${correctedDO.toFixed(2)} mg/L\nPorcentaje de Saturación: ${saturationPercentage.toFixed(2)}%`;
+}
+
+function toggleInfo() {
+    const infoDiv = document.getElementById('info');
+    infoDiv.style.display = (infoDiv.style.display === 'none' || infoDiv.style.display === '') ? 'block' : 'none';
+}
+
+function toggleDoRanges() {
+    const doRangesDiv = document.getElementById('doRanges');
+    doRangesDiv.style.display = (doRangesDiv.style.display === 'none' || doRangesDiv.style.display === '') ? 'block' : 'none';
 }
